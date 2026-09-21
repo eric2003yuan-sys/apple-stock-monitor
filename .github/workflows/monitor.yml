@@ -1,0 +1,45 @@
+name: stock-monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # GitHub 的定时是"尽力而为"，实际间隔常常大于 5 分钟
+  workflow_dispatch:
+    inputs:
+      test_part:
+        description: "测试用型号（留空 = 正常监控）。填一个确定有货的型号可验证提醒链路"
+        required: false
+        default: ""
+
+concurrency:
+  group: stock-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # 仅用于把 state.json 的变化提交回仓库
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Apple Store pickup availability
+        env:
+          BARK_KEY: ${{ secrets.BARK_KEY }}
+          SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+          SILENT: ${{ vars.SILENT }}
+          TEST_PART: ${{ inputs.test_part }}
+        run: python3 check.py
+
+      - name: Save state if changed
+        if: always()
+        run: |
+          if ! git diff --quiet -- state.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add state.json
+            git commit -q -m "state: update [skip ci]"
+            git pull -q --rebase
+            git push -q
+          fi
