@@ -1,1 +1,16 @@
-{}
+{
+  "in_stock": {
+    "MJXY4ZA/A": []
+  },
+  "last_alert": {
+    "MJXY4ZA/A": 1790551243.6998456
+  },
+  "last_wechat": {
+    "MJXY4ZA/A": 1790551243.6998456
+  },
+  "fails": 0,
+  "blind": false,
+  "wechat_date": "2026-09-28",
+  "wechat_used": 1,
+  "updated": "2026-09-28 07:21:47 HKT"
+}
